@@ -2,6 +2,8 @@
 
 A Whisper API than can be deployed instantly using Docker. Entirely based on [whisper.cpp](https://github.com/ggerganov/whisper.cpp), which enables running whisper on consumer-grade CPU.
 
+**Note** : This is still an early version of the docker API, mainly made for myself. Feel free to use it and improve it as you want.
+
 ## Usage
 
 To use this repo, you will need to have the docker engine installed and running.
