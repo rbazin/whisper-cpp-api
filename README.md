@@ -1,2 +1,5 @@
-# whisper-cpp-api
-A Whisper docker API  thant runs on consumer-grade CPU for easy speech transcription
+# Whisper.cpp Docker API
+
+A Whisper API than can be deployed instantly using Docker. Entirely based on [whisper.cpp](https://github.com/ggerganov/whisper.cpp), which enables running whisper on consumer-grade CPU.
+
+## Usage
