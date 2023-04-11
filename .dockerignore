@@ -1,0 +1,5 @@
+.gitignore
+venv
+whisper.cpp
+__pycache__
+.git
