@@ -16,7 +16,7 @@ RUN make main
 FROM python:3.11-slim
 
 RUN apt-get update \
- && apt-get install -y --no-install-recommends libsdl2-dev alsa-utils ffmpeg \
+ && apt-get install -y --no-install-recommends ffmpeg \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
