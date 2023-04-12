@@ -1,32 +1,45 @@
-FROM python:3.11.2-slim
+FROM debian:11 AS build
 
-# This keeps Python from buffering stdin/stdout
-ENV PYTHONUNBUFFERED TRUE
+RUN apt -q -y update && apt -q -y upgrade
+RUN apt -q -y install -q -y libsdl2-dev alsa-utils
+RUN apt -q -y install -q -y g++ make wget git
 
-# install system dependencies
+RUN git clone --depth 1 https://github.com/ggerganov/whisper.cpp.git -b v1.2.1
+
+WORKDIR /whisper.cpp
+
+ARG model=base
+RUN bash ./models/download-ggml-model.sh "${model}"
+RUN make main
+
+# second stage for image optimization
+FROM python:3.11-slim
+
 RUN apt-get update \
-    && apt-get -y install gcc make wget git ffmpeg g++ \
-    && rm -rf /var/lib/apt/lists/*
-
-# install dependencies
-RUN pip install --no-cache-dir --upgrade pip
+ && apt-get install -y --no-install-recommends libsdl2-dev alsa-utils ffmpeg \
+ && apt-get clean \
+ && rm -rf /var/lib/apt/lists/*
 
 # set work directory
 WORKDIR /app
+
+ARG model=base
+RUN mkdir -p /app/whisper.cpp/models
+COPY --from=build "/whisper.cpp/models/ggml-${model}.bin" "/app/whisper.cpp/models/ggml-${model}.bin"
+COPY --from=build /whisper.cpp/main /app/whisper.cpp/
+
+# install dependencies
+RUN pip install --no-cache-dir --upgrade pip
 
 # copy requirements.txt
 COPY ./requirements.txt /app/requirements.txt
 
 # install project requirements
 RUN pip install --no-cache-dir -r requirements.txt
-RUN git clone https://github.com/ggerganov/whisper.cpp.git -b v1.2.1
-RUN cd whisper.cpp && /bin/bash ./models/download-ggml-model.sh base && make
 
 # copy project
 COPY . .
 
-# set app port
+# expose port and run server
 EXPOSE 4000
-
-# Run app.py when the container runs
 CMD ["gunicorn"  , "-b", "0.0.0.0:4000", "-t", "600", "app:app"] 
